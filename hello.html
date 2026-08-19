@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Orbit Calculator</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --ink: #f4f1ea;
+            --muted: #9b9ba3;
+            --panel: rgba(24, 25, 32, 0.92);
+            --button: #2a2b35;
+            --button-hover: #383945;
+            --accent: #ffb84d;
+            --accent-deep: #e78d24;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            min-height: 100vh;
+            margin: 0;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            color: var(--ink);
+            font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+            background: #101117;
+            background-image: radial-gradient(circle at 15% 15%, #32323b 0, transparent 31%), linear-gradient(135deg, #101117 0%, #191b22 52%, #2a2220 100%);
+        }
+
+        .calculator {
+            width: min(100%, 380px);
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            background: var(--panel);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.4);
+        }
+
+        .topline {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 0 4px 18px;
+            color: var(--muted);
+            font-size: 0.72rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .topline span:last-child { color: var(--accent); }
+
+        .screen {
+            min-height: 132px;
+            display: flex;
+            flex-direction: column;
+            justify-content: end;
+            align-items: end;
+            padding: 18px 12px 20px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            border-radius: 16px;
+            background: #13141a;
+            text-align: right;
+        }
+
+        .history {
+            min-height: 22px;
+            width: 100%;
+            color: var(--muted);
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .display {
+            width: 100%;
+            margin-top: 6px;
+            font-size: clamp(2.3rem, 11vw, 3.4rem);
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .keys {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        button {
+            min-width: 0;
+            min-height: 62px;
+            border: 0;
+            border-radius: 15px;
+            color: var(--ink);
+            background: var(--button);
+            font: inherit;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 120ms ease, background 120ms ease;
+        }
+
+        button:hover { background: var(--button-hover); }
+        button:active { transform: scale(0.95); }
+        button:focus-visible { outline: 3px solid rgba(255, 184, 77, 0.6); outline-offset: 2px; }
+        .utility { color: var(--accent); background: #39302a; }
+        .operator, .equals { color: #17130d; background: var(--accent); }
+        .operator:hover, .equals:hover { background: #ffc66c; }
+        .zero { grid-column: span 2; }
+
+        @media (max-width: 400px) {
+            body { padding: 12px; }
+            .calculator { padding: 15px; border-radius: 20px; }
+            button { min-height: 58px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="calculator" aria-label="Calculator">
+        <div class="topline"><span>Orbit</span><span>Ready</span></div>
+        <section class="screen" aria-live="polite">
+            <div class="history" id="history"></div>
+            <div class="display" id="display">0</div>
+        </section>
+        <section class="keys" aria-label="Calculator keys">
+            <button class="utility" data-action="clear">AC</button>
+            <button class="utility" data-action="delete" aria-label="Delete">DEL</button>
+            <button class="utility" data-action="percent">%</button>
+            <button class="operator" data-operation="divide" aria-label="Divide">÷</button>
+            <button data-number="7">7</button>
+            <button data-number="8">8</button>
+            <button data-number="9">9</button>
+            <button class="operator" data-operation="multiply" aria-label="Multiply">×</button>
+            <button data-number="4">4</button>
+            <button data-number="5">5</button>
+            <button data-number="6">6</button>
+            <button class="operator" data-operation="subtract" aria-label="Subtract">−</button>
+            <button data-number="1">1</button>
+            <button data-number="2">2</button>
+            <button data-number="3">3</button>
+            <button class="operator" data-operation="add" aria-label="Add">+</button>
+            <button class="zero" data-number="0">0</button>
+            <button data-action="decimal">.</button>
+            <button class="equals" data-action="equals">=</button>
+        </section>
+    </main>
+    <script>
+        const display = document.querySelector('#display');
+        const history = document.querySelector('#history');
+        let current = '0';
+        let stored = null;
+        let operation = null;
+        let replaceDisplay = false;
+
+        const symbols = { add: '+', subtract: '−', multiply: '×', divide: '÷' };
+
+        function render() {
+            display.textContent = current;
+            history.textContent = stored !== null && operation ? `${stored} ${symbols[operation]}` : '';
+        }
+
+        function inputNumber(number) {
+            if (replaceDisplay || current === 'Error') current = number;
+            else current = current === '0' ? number : current + number;
+            replaceDisplay = false;
+            render();
+        }
+
+        function inputDecimal() {
+            if (replaceDisplay || current === 'Error') current = '0.';
+            else if (!current.includes('.')) current += '.';
+            replaceDisplay = false;
+            render();
+        }
+
+        function calculate() {
+            const left = Number(stored);
+            const right = Number(current);
+            if (operation === 'divide' && right === 0) return 'Error';
+            return String({ add: left + right, subtract: left - right, multiply: left * right, divide: left / right }[operation]);
+        }
+
+        function chooseOperation(nextOperation) {
+            if (current === 'Error') return clear();
+            if (stored !== null && !replaceDisplay) current = calculate();
+            stored = current;
+            operation = nextOperation;
+            replaceDisplay = true;
+            render();
+        }
+
+        function clear() {
+            current = '0'; stored = null; operation = null; replaceDisplay = false; render();
+        }
+
+        function equals() {
+            if (stored === null || !operation) return;
+            const expression = `${stored} ${symbols[operation]} ${current}`;
+            current = calculate(); stored = null; operation = null; replaceDisplay = true;
+            history.textContent = `${expression} =`;
+            display.textContent = current;
+        }
+
+        function handleAction(action) {
+            if (action === 'clear') clear();
+            if (action === 'delete') { current = current.length > 1 ? current.slice(0, -1) : '0'; render(); }
+            if (action === 'decimal') inputDecimal();
+            if (action === 'percent' && current !== 'Error') { current = String(Number(current) / 100); render(); }
+            if (action === 'equals') equals();
+        }
+
+        document.querySelector('.keys').addEventListener('click', (event) => {
+            const button = event.target.closest('button');
+            if (!button) return;
+            if (button.dataset.number) inputNumber(button.dataset.number);
+            else if (button.dataset.operation) chooseOperation(button.dataset.operation);
+            else handleAction(button.dataset.action);
+        });
+
+        document.addEventListener('keydown', (event) => {
+            if (/\d/.test(event.key)) inputNumber(event.key);
+            else if (event.key === '.') inputDecimal();
+            else if (event.key === 'Enter' || event.key === '=') equals();
+            else if (event.key === 'Escape') clear();
+            else if (event.key === 'Backspace') handleAction('delete');
+            else if ({ '+': 'add', '-': 'subtract', '*': 'multiply', '/': 'divide' }[event.key]) chooseOperation({ '+': 'add', '-': 'subtract', '*': 'multiply', '/': 'divide' }[event.key]);
+        });
+    </script>
+</body>
+</html>
