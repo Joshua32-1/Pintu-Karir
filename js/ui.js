@@ -85,3 +85,18 @@ export async function withPending(button, label, fn) {
     button.textContent = original;
   }
 }
+
+/* Transient confirmation. Saving previously just closed the modal, which reads as
+ * "nothing happened" when you're not looking at the view that changed. */
+export function toast(message) {
+  let el = $('#toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'toast';
+    document.body.appendChild(el);
+  }
+  el.textContent = message;
+  el.classList.add('show');
+  clearTimeout(toast._timer);
+  toast._timer = setTimeout(() => el.classList.remove('show'), 2600);
+}

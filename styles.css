@@ -63,3 +63,12 @@ button.cat.active { background: var(--red2); border-color: #f6c0c3; color: var(-
 
 .empty { color: var(--muted); font-size: 13px; padding: 6px 0; }
 .chat-scroll { min-height: 230px; max-height: 330px; overflow: auto; }
+
+#toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translate(-50%, 14px);
+  background: var(--ink); color: #fff; font-weight: 600; font-size: 13px;
+  padding: 12px 18px; border-radius: 11px; box-shadow: 0 12px 32px #18202b33;
+  opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s; z-index: 6;
+}
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+@media (max-width: 850px) { #toast { bottom: 80px; } }
