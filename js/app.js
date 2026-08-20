@@ -386,37 +386,58 @@ function postJobModal() {
 function profileModal() {
   const { profile } = auth.state();
   if (!profile) return authModal('in');
-  openModal(`<h2>Edit profile</h2>
-    <label>Full name</label><input id="pName" value="${esc(profile.full_name)}">
-    <label>Headline</label><input id="pHeadline" value="${esc(profile.headline)}">
-    <label>University</label><input id="pUni" value="${esc(profile.university)}">
-    <label>Major</label><input id="pMajor" value="${esc(profile.major)}">
-    <label>Graduation year</label><input id="pYear" value="${esc(profile.grad_year)}">
-    <label>Bio</label><textarea id="pBio">${esc(profile.bio)}</textarea>
-    <label>Skills (comma separated)</label><input id="pSkills" value="${esc((profile.skills || []).join(', '))}">
+  openModal(`<form id="profileForm">
+    <h2>Edit profile</h2>
+    <p class="form-note">Keep these details current to improve your job matches and make your profile easier to discover.</p>
+    <label>Full name <span aria-hidden="true">*</span></label><input id="pName" required maxlength="80" autocomplete="name" value="${esc(profile.full_name)}">
+    <label>Headline</label><input id="pHeadline" maxlength="120" placeholder="e.g. UX Design student seeking internships" value="${esc(profile.headline)}">
+    <label>University</label><input id="pUni" maxlength="120" value="${esc(profile.university)}">
+    <label>Major</label><input id="pMajor" maxlength="120" value="${esc(profile.major)}">
+    <label>Graduation year</label><input id="pYear" inputmode="numeric" maxlength="4" placeholder="e.g. 2027" value="${esc(profile.grad_year)}">
+    <label>About you</label><textarea id="pBio" maxlength="600" placeholder="Share a little about your goals, experience, and what you are looking for.">${esc(profile.bio)}</textarea>
+    <label>Skills <small class="meta">Separate each skill with a comma</small></label><input id="pSkills" maxlength="300" placeholder="e.g. Figma, User Research, HTML" value="${esc((profile.skills || []).join(', '))}">
     <p class="form-note">Account type is ${esc(profile.role)} and cannot be changed here.</p>
-    <button class="btn red block" id="doSaveProfile">Save changes</button>`);
+    <div class="modal-actions"><button class="btn ghost" type="button" id="cancelProfile">Cancel</button><button class="btn red" type="submit" id="doSaveProfile">Save changes</button></div>
+  </form>`);
 
-  $('#doSaveProfile').onclick = async () => {
+  $('#cancelProfile').onclick = closeModal;
+  $('#profileForm').onsubmit = async (event) => {
+    event.preventDefault();
+    const fullName = $('#pName').value.trim();
+    const gradYear = $('#pYear').value.trim();
+    const skills = [...new Set($('#pSkills').value.split(',').map((s) => s.trim()).filter(Boolean))].slice(0, 20);
+    if (!fullName) return modalError('Please enter your full name.');
+    if (gradYear && !/^(19|20)\d{2}$/.test(gradYear)) return modalError('Please enter a valid four-digit graduation year.');
     try {
       await withPending($('#doSaveProfile'), 'Saving…', () => auth.updateProfile({
-        full_name: $('#pName').value.trim(),
+        full_name: fullName,
         headline: $('#pHeadline').value.trim(),
         university: $('#pUni').value.trim(),
         major: $('#pMajor').value.trim(),
-        grad_year: $('#pYear').value.trim(),
+        grad_year: gradYear,
         bio: $('#pBio').value.trim(),
-        skills: $('#pSkills').value.split(',').map((s) => s.trim()).filter(Boolean),
+        skills,
       }));
+      renderHeader();
+      renderProfile();
       closeModal();
-      // Match scores on Home/Explore are derived from profile.skills, so they go stale
-      // unless those views re-render after an edit.
+      // Match scores on Home/Explore are derived from profile.skills, so they go
+      // stale unless those views re-render after an edit.
       renderHome();
       renderExplore();
-      go('profile');
-      toast('Profile updated');
+      showProfileSaved();
     } catch (err) { modalError(err.message || 'Could not save your profile.'); }
   };
+}
+
+function showProfileSaved() {
+  const card = $('#profileCard');
+  const notice = document.createElement('p');
+  notice.className = 'profile-saved';
+  notice.setAttribute('role', 'status');
+  notice.textContent = '✓ Profile updated successfully';
+  card.prepend(notice);
+  setTimeout(() => notice.remove(), 3500);
 }
 
 function mentorModal(name) {
