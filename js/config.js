@@ -7,8 +7,8 @@
  *
  * There is no build step here, so these are plain committed constants rather than env vars.
  */
-export const SUPABASE_URL = '__SUPABASE_URL__';
-export const SUPABASE_PUBLISHABLE_KEY = '__SUPABASE_PUBLISHABLE_KEY__';
+export const SUPABASE_URL = 'https://dvhhzuigprefvgckoffs.supabase.co';
+export const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_946PV3zTMVF-XNF6eHYDNg_xvVO3yJp';
 
 export const isConfigured = () =>
   !SUPABASE_URL.startsWith('__') && !SUPABASE_PUBLISHABLE_KEY.startsWith('__');

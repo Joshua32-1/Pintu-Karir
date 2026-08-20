@@ -80,7 +80,7 @@ create trigger on_auth_user_created
 -- ---------------------------------------------------------------- role helper
 -- SECURITY DEFINER so policies can read a role without recursing through RLS.
 
-create function public.current_role()
+create function public.auth_role()
 returns public.user_role
 language sql
 stable
@@ -93,6 +93,12 @@ $$;
 -- `role` is deliberately excluded from the UPDATE grant: without this a Student could
 -- promote themselves to Employer and gain permission to post jobs.
 
+-- Supabase grants anon/authenticated broad privileges on new public tables by default,
+-- so these must REVOKE before granting or the column-level grant constrains nothing.
+revoke all on public.profiles     from anon, authenticated;
+revoke all on public.jobs         from anon, authenticated;
+revoke all on public.applications from anon, authenticated;
+
 grant select on public.profiles to anon, authenticated;
 grant update (full_name, headline, university, major, grad_year, bio, skills)
   on public.profiles to authenticated;
@@ -100,8 +106,18 @@ grant update (full_name, headline, university, major, grad_year, bio, skills)
 grant select on public.jobs to anon, authenticated;
 grant insert, update, delete on public.jobs to authenticated;
 
+-- applications are never readable by anonymous visitors
 grant select, insert on public.applications to authenticated;
 grant update (status) on public.applications to authenticated;
+
+-- Both SECURITY DEFINER functions are otherwise exposed at /rest/v1/rpc/.
+-- handle_new_user is a trigger function and must not be callable at all.
+revoke all on function public.handle_new_user() from public, anon, authenticated;
+
+-- auth_role is evaluated inside RLS policies with the caller's privileges, so
+-- `authenticated` must keep EXECUTE. It only returns the caller's own role.
+revoke all on function public.auth_role() from public, anon;
+grant execute on function public.auth_role() to authenticated;
 
 -- ---------------------------------------------------------------- RLS
 
@@ -129,7 +145,7 @@ create policy "alumni and employers can post jobs"
   to authenticated
   with check (
     (select auth.uid()) = posted_by
-    and public.current_role() in ('Alumni', 'Employer')
+    and public.auth_role() in ('Alumni', 'Employer')
   );
 
 create policy "owners can update their jobs"
@@ -163,7 +179,7 @@ create policy "students can apply"
   to authenticated
   with check (
     (select auth.uid()) = applicant_id
-    and public.current_role() = 'Student'
+    and public.auth_role() = 'Student'
   );
 
 create policy "job owners can move application status"
