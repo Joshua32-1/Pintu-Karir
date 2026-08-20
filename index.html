@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="en" data-auth="loading">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PINTU Karir</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="shell">
+  <aside class="side" id="sidebar">
+    <div class="brand">PINTU <i>Karir</i></div>
+    <nav class="nav" id="nav">
+      <button class="active" data-page="home">&#8962; &nbsp; Home</button>
+      <button data-page="explore">&#8981; &nbsp; Explore</button>
+      <button data-page="applications">&#9635; &nbsp; Applications</button>
+      <button data-page="mentorship">&#9825; &nbsp; Mentorship</button>
+      <button data-page="network">&#9678; &nbsp; My Network</button>
+      <button data-page="messages">&#9993; &nbsp; Messages</button>
+      <button data-page="profile">&#9711; &nbsp; Profile</button>
+    </nav>
+    <div class="side-bottom">&#10022; <b>Career tip</b><br>Small steps compound into big career moves.</div>
+  </aside>
+
+  <main class="main">
+    <header class="top">
+      <button class="mobile-menu btn ghost" id="menuToggle" aria-label="Open navigation">&#9776;</button>
+
+      <div class="welcome">
+        <div class="avatar" id="headerAvatar">&#8212;</div>
+        <div>
+          <small id="headerGreeting">Welcome</small><br>
+          <b id="headerName">Guest</b>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;align-items:center">
+        <div class="notif-wrap" data-when="in">
+          <button class="notif" id="notifButton" aria-label="Notifications">&#9831;<span class="dot" id="notifDot" hidden></span></button>
+          <div class="notif-panel" id="notifPanel" hidden></div>
+        </div>
+        <button class="btn ghost" id="authButton">Sign in</button>
+      </div>
+    </header>
+
+    <!-- ============================ HOME ============================ -->
+    <section class="view active" id="home">
+      <div class="hero">
+        <div>
+          <h1>Open the right door.</h1>
+          <p>Trusted opportunities and people to help you grow.</p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn red" data-go="explore">Find opportunities &rarr;</button>
+            <button class="btn light" id="postJobButton" data-when="in" hidden>+ Post a job</button>
+          </div>
+        </div>
+        <div class="hero-art">&#128682;</div>
+      </div>
+
+      <div class="section-head">
+        <h2>Recommended for you</h2>
+        <button class="link" data-go="explore">See all</button>
+      </div>
+      <div class="cards" id="recommend"></div>
+
+      <div class="section-head"><h2>Find your next gig</h2></div>
+      <div class="cats" id="categories"></div>
+
+      <div class="section-head">
+        <h2>Connect with alumni</h2>
+        <button class="link" data-go="mentorship">Meet more</button>
+      </div>
+      <div class="alumni" id="homeAlumni"></div>
+
+      <div class="section-head"><h2>Career tip</h2></div>
+      <div class="tip">&#10024; Tailor the first two lines of your CV to every role. Recruiters should understand your fit in seconds.</div>
+    </section>
+
+    <!-- ============================ EXPLORE ============================ -->
+    <section class="view" id="explore">
+      <div class="section-head">
+        <h2>Explore opportunities</h2>
+        <span class="meta" id="resultCount"></span>
+      </div>
+
+      <div class="search">
+        <input id="search" placeholder="Search jobs, companies, or skills">
+        <button class="btn red" id="filterButton">Filter</button>
+        <button class="btn ghost" id="clearFilters">Clear</button>
+      </div>
+
+      <div class="profile" id="advancedFilters" hidden>
+        <div class="section-head" style="margin-top:0">
+          <h3>Filter opportunities</h3>
+          <button class="link" id="closeFilters">Close</button>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
+          <label>Job type
+            <select id="filterType">
+              <option value="All">All types</option>
+              <option>Internship</option><option>Part-time</option>
+              <option>Full-time</option><option>Freelance</option><option>Tutoring</option>
+            </select>
+          </label>
+          <label>Location
+            <select id="filterLocation">
+              <option value="All">All locations</option>
+              <option>Remote</option><option>Singapore</option>
+              <option>Hybrid</option><option>NTU</option>
+            </select>
+          </label>
+          <label>Industry / skill
+            <input id="filterKeyword" placeholder="e.g. IT, Marketing">
+          </label>
+        </div>
+      </div>
+
+      <div class="chips" id="typeChips">
+        <button class="chip active" data-type="All">All</button>
+        <button class="chip" data-type="Internship">Internship</button>
+        <button class="chip" data-type="Part-time">Part-time</button>
+        <button class="chip" data-type="Freelance">Freelance</button>
+        <button class="chip" data-type="Tutoring">Tutoring</button>
+      </div>
+
+      <div class="list" id="jobs"></div>
+    </section>
+
+    <!-- ============================ APPLICATIONS ============================ -->
+    <section class="view" id="applications">
+      <div class="section-head">
+        <h2>My applications</h2>
+        <span class="meta" id="appCount">0 total</span>
+      </div>
+      <div class="timeline" id="apps"></div>
+
+      <div data-when="in" id="employerInbox"></div>
+    </section>
+
+    <!-- ============================ MENTORSHIP ============================ -->
+    <section class="view" id="mentorship">
+      <div class="hero">
+        <div>
+          <h1>Learn from people<br>who've been there.</h1>
+          <p>Connect with NTU alumni who can help you move forward.</p>
+        </div>
+        <div class="hero-art">&#10022;</div>
+      </div>
+      <div class="search">
+        <input id="mentorSearch" placeholder="Search by industry, role, or company">
+      </div>
+      <div class="alumni" id="allAlumni"></div>
+    </section>
+
+    <!-- ============================ NETWORK ============================ -->
+    <section class="view" id="network">
+      <div class="section-head">
+        <h2>My Network</h2>
+        <span class="match" id="connectionCount">0 connections</span>
+      </div>
+      <div class="search">
+        <input id="networkSearch" placeholder="Search alumni by name, company, role, or industry...">
+      </div>
+      <div class="alumni" id="networkPeople"></div>
+    </section>
+
+    <!-- ============================ MESSAGES ============================ -->
+    <section class="view" id="messages">
+      <div class="section-head">
+        <h2>Messages</h2>
+        <span class="meta">Only connections can message</span>
+      </div>
+      <div id="messageLayout" style="display:grid;grid-template-columns:230px 1fr;gap:14px">
+        <div class="profile" id="conversationList"></div>
+        <div class="profile" id="chatWindow"></div>
+      </div>
+    </section>
+
+    <!-- ============================ PROFILE ============================ -->
+    <section class="view" id="profile">
+      <div class="section-head">
+        <h2>My profile</h2>
+        <button class="btn red" id="editProfileButton" data-when="in">Edit profile</button>
+      </div>
+      <div class="profile" id="profileCard"></div>
+    </section>
+
+    <!-- ============================ JOB DETAIL ============================ -->
+    <section class="view detail" id="detail">
+      <button class="back" data-go="explore">&larr; Back to explore</button>
+      <div class="job" id="detailContent"></div>
+    </section>
+  </main>
+</div>
+
+<div class="nav-scrim" id="navScrim" hidden></div>
+
+<!-- Single shared modal. `modalBody` is the id the old code assumed but never had. -->
+<div class="modal" id="modal">
+  <div class="modal-box">
+    <button class="close" id="modalClose" aria-label="Close">&times;</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
