@@ -5,7 +5,7 @@
  * or threw on an undefined `$` / `modalBody`, is wired here.
  */
 
-import { $, $$, esc, initials, go, onNavigate, openNav, closeNav, openModal, closeModal, modalError, withPending } from './ui.js';
+import { $, $$, esc, initials, go, onNavigate, openNav, closeNav, openModal, closeModal, modalError, withPending, toast } from './ui.js';
 import { configured } from './supabase.js';
 import * as auth from './auth.js';
 import {
@@ -330,6 +330,7 @@ function applyModal(job) {
       renderApplications();
       renderNotifications();
       go('applications');
+      toast('Application submitted');
     } catch (err) {
       modalError(err.code === '23505'
         ? 'You have already applied to this opportunity.'
@@ -375,6 +376,7 @@ function postJobModal() {
       closeModal();
       renderHome(); renderExplore();
       go('explore');
+      toast('Opportunity published');
     } catch (err) {
       modalError(err.message || 'Could not publish this opportunity.');
     }
@@ -419,6 +421,10 @@ function profileModal() {
       renderHeader();
       renderProfile();
       closeModal();
+      // Match scores on Home/Explore are derived from profile.skills, so they go
+      // stale unless those views re-render after an edit.
+      renderHome();
+      renderExplore();
       showProfileSaved();
     } catch (err) { modalError(err.message || 'Could not save your profile.'); }
   };
@@ -666,7 +672,7 @@ async function boot() {
 
   // Resolve the session before painting auth-dependent chrome, so there's no
   // flash of signed-out UI on reload.
-  auth.onAuthChange(() => { renderHeader(); renderProfile(); renderApplications(); });
+  auth.onAuthChange(() => { renderHeader(); renderProfile(); renderApplications(); renderHome(); renderExplore(); });
   await auth.init();
   await refreshRemote();
 }
