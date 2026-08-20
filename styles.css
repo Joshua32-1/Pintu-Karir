@@ -1,0 +1,20 @@
+/* PINTU Karir extensions. The original visual system remains in hello.html. */
+#networkPeople .person,
+#conversationList,
+#chatWindow { transition: box-shadow .2s, transform .2s; }
+#networkPeople .person:hover,
+#conversationList:hover,
+#chatWindow:hover { box-shadow: 0 8px 24px #18202b12; }
+#networkPeople .btn { transition: background .2s, color .2s; }
+#chatWindow > div:first-of-type { scrollbar-width: thin; }
+#advancedFilters { margin: -8px 0 18px; }
+#advancedFilters label { display: grid; gap: 6px; color: var(--muted); font-size: 12px; font-weight: 600; }
+#advancedFilters input, #advancedFilters select { width: 100%; padding: 10px 11px; border: 1px solid var(--line); border-radius: 9px; background: #fff; color: var(--ink); }
+#resultCount { margin-left: auto; }
+@media (max-width:850px) {
+  #advancedFilters > div:last-child { grid-template-columns: 1fr !important; }
+  #messageLayout { grid-template-columns: 1fr !important; }
+  #conversationList { display:flex; gap:6px; overflow:auto; align-items:center; }
+  #conversationList h3 { min-width:max-content; }
+  #conversationList .btn { min-width:max-content; width:auto !important; }
+}
